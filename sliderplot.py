@@ -1,3 +1,4 @@
+import collections.abc
 import inspect
 from inspect import signature
 
@@ -9,15 +10,14 @@ SLIDER_HEIGHT = 0.05
 BOTTOM_PADDING = (0.03, 0.1)
 
 
-def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), show=True, wrapper=None):
+def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=True, wrapper=None):
+    # Get init parameters
     params = signature(f).parameters
     init_params = [param.default if param.default is not inspect.Parameter.empty else 1 for param in
                    params.values()]
-    # Create the figure and the line that we will manipulate
-    fig, ax = plt.subplots()
-    t, y = f(*init_params)
-    line, = ax.plot(t, y, lw=2)
-    ax.grid()
+
+    outputs = f(*init_params)
+    fig, axs, lines = create_plot(outputs)
 
     # adjust the main plot to make room for the sliders
     fig.subplots_adjust(bottom=sum(BOTTOM_PADDING) + len(params) * SLIDER_HEIGHT)
@@ -40,15 +40,21 @@ def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), show=True, wrapper
         sliders.append(slider)
 
     # The function to be called anytime a slider's value changes
-    def update(val):
+    def update(_):
         try:
-            t, y = f(*(slider.val for slider in sliders))
+            outputs = f(*(slider.val for slider in sliders))
         except ZeroDivisionError:
-            t, y = [], []
-        line.set_data(t, y)
+            return
+
+        for line, (x, y) in zip(lines, get_lines(outputs)):
+            line.set_data(x, y)
         fig.canvas.draw_idle()
-        ax.relim()
-        ax.autoscale_view(True, True, True)
+        if hasattr(axs, "__len__"):
+            [ax.relim() for ax in axs]
+            [ax.autoscale_view(True, True, True) for ax in axs]
+        else:
+            axs.relim()
+            axs.autoscale_view(True, True, True)
 
     # register the update function with each slider
     [slider.on_changed(update) for slider in sliders]
@@ -61,18 +67,76 @@ def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), show=True, wrapper
         [slider.reset() for slider in sliders]
 
     button.on_clicked(reset)
+    fig._sliderplot_button = button  # Prevent garbage collector from deleting button behavior
     if show:
         plt.show()
-    return fig, ax
+    return fig, axs
+
+
+def compute_depth(data) -> int:
+    # TODO: check depth of all elements
+    depth = 0
+    current_element = data
+    while True:
+        try:
+            current_element = current_element[0]
+            depth += 1
+        except IndexError:
+            break
+    return depth
+
+
+def create_plot(outputs):
+    lines = []
+    outputs_depth = compute_depth(outputs)
+    n_plots = 1 if outputs_depth < 4 else len(outputs)
+    fig, axs = plt.subplots(ncols=n_plots)
+    if n_plots == 1:
+        axs.grid()
+        if outputs_depth == 3:
+            for x, y in outputs:
+                line, = axs.plot(x, y, lw=2)
+                lines.append(line)
+        elif outputs_depth == 2:
+            line, = axs.plot(outputs[0], outputs[1], lw=2)
+            lines.append(line)
+        elif outputs_depth == 1:
+            x = np.arange(len(outputs))
+            line, = axs.plot(x, outputs, lw=2)
+            lines.append(line)
+    else:
+        for ax, subplot_data in zip(axs, outputs):
+            ax.grid()
+            for x, y in subplot_data:
+                line, = ax.plot(x, y, lw=2)
+                lines.append(line)
+    return fig, axs, lines
+
+
+def get_lines(outputs):
+    outputs_depth = compute_depth(outputs)
+    if outputs_depth == 3:
+        return outputs
+    elif outputs_depth == 2:
+        return ((outputs[0], outputs[1]),)
+    elif outputs_depth == 1:
+        x = np.arange(len(outputs))
+        return ((x, outputs),)
+    elif outputs_depth == 4:
+        lines_xy = []
+        for subplot_data in outputs:
+            for x, y in subplot_data:
+                lines_xy.append((x, y))
+        return lines_xy
 
 
 if __name__ == '__main__':
     def f(k=2, c=3, m=5):
         x = np.linspace(0, 100)
         y = k * x - c + x % m
-        return x, y
+        return ((x, y),), ((2 * x, 2 * y), (x, 2 * y - x))
 
 
-    fig, ax=sliderplot(f, show=False)
-    ax.set_title("Hey")
+    fig, axs = sliderplot(f, show=False)
+    axs[0].set_title("Hey")
     plt.show()
