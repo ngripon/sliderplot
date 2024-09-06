@@ -1,6 +1,7 @@
 # sliderplot
 
-![demo](https://github.com/ngripon/sliderplot/blob/main/demo.gif)
+
+<img src="https://github.com/ngripon/sliderplot/blob/main/demo.gif" width="400" alt="demo" />
 
 Turn a function into an interactive plot with a single line of code.
 
