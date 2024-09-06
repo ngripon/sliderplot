@@ -40,7 +40,7 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     # Create sliders
     sliders = []
     for i, param in enumerate(params.keys()):
-        slider_ax = fig.add_axes((0.1, BOTTOM_PADDING[0] + SLIDER_HEIGHT * (len(params) - 1 - i), 0.6, 0.03))
+        slider_ax = fig.add_axes((0.15, BOTTOM_PADDING[0] + SLIDER_HEIGHT * (len(params) - 1 - i), 0.6, 0.03))
         if i < len(params_bounds):
             val_min, val_max = params_bounds[i]
         else:
@@ -75,7 +75,7 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     [slider.on_changed(update) for slider in sliders]
 
     # Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
-    reset_ax = fig.add_axes((0.8, BOTTOM_PADDING[0] + (len(params) - 1) * SLIDER_HEIGHT, 0.1, 0.04))
+    reset_ax = fig.add_axes((0.85, BOTTOM_PADDING[0] + (len(params) - 1) * SLIDER_HEIGHT, 0.1, 0.04))
     button = Button(reset_ax, 'Reset', hovercolor='0.975')
 
     def reset(event):
@@ -155,12 +155,13 @@ def get_lines(outputs, plot_mode: PlotMode):
 
 
 if __name__ == '__main__':
-    def f(k=2, c=3, m=5):
-        x = np.linspace(0, 100)
-        y = k * x - c + x % m
-        return ((x, y),), ((2 * x, 2 * y), (x, 2 * y - x))
+    def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+        x = np.linspace(0, 10, 1000)
+        y = amplitude * np.sin(frequency * x + phase)
+        return x, y
 
 
-    fig, axs = sliderplot(f, show=False)
-    axs[0].set_title("Hey")
-    plt.show()
+    fig, axs = sliderplot(f, params_bounds=((0, 10), (0, 10 * np.pi), (0, 2 * np.pi)))
+
+    # axs[0].set_title("Hey")
+    # plt.show()
