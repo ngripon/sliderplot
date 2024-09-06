@@ -1,9 +1,9 @@
 # sliderplot
 
-
-<img src="https://github.com/ngripon/sliderplot/blob/main/demo.gif" width="400" alt="demo" />
-
 Turn a function into an interactive plot with a single line of code.
+
+<img src="https://github.com/ngripon/sliderplot/blob/main/demo.gif" width="600" alt="demo" 
+style="margin: 0 auto; display: block" />
 
 ``` python
     def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
