@@ -1,6 +1,8 @@
 # sliderplot
 
-Create matplotlib interactive plot from a function with a single line of code.
+![](https://github.com/ngripon/sliderplot/demo.gif)
+
+Turn a function into an interactive plot with a single line of code.
 
 ``` python
     def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
