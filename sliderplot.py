@@ -1,6 +1,7 @@
 import enum
 import inspect
 from inspect import signature
+from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,7 +18,14 @@ class PlotMode(enum.Enum):
     MULTI_PLOT = 3
 
 
-def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=True, wrapper=None):
+def sliderplot(f: Callable, params_bounds=(), show: bool = True):
+    """
+    Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
+    :param f: Function to explore.
+    :param params_bounds: Sequence of (val_min, val_max) bounds for each parameter of the function f.
+    :param show: If True, show the plot.
+    :return: fig and axs (Axes object if there is one subplot, and list of Axes if there are multiple subplots).
+    """
     # Get init parameters
     params = signature(f).parameters
     init_params = [param.default if param.default is not inspect.Parameter.empty else 1 for param in
@@ -103,7 +111,6 @@ def compute_depth(data) -> int:
     return depth
 
 
-# TODO: raise exceptions in invalid cases
 def create_plot(outputs):
     lines = []
     plot_mode = get_plot_mode(outputs)
