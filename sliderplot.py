@@ -30,14 +30,14 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     params = signature(f).parameters
     init_params = [param.default if param.default is not inspect.Parameter.empty else 1 for param in
                    params.values()]
-
     outputs = f(*init_params)
-    fig, axs, lines, plot_mode = create_plot(outputs)
 
-    # adjust the main plot to make room for the sliders
+    # Create plot
+    fig, axs, lines, plot_mode = create_plot(outputs)
+    # Adjust the main plot to make room for the sliders
     fig.subplots_adjust(bottom=sum(BOTTOM_PADDING) + len(params) * SLIDER_HEIGHT)
 
-    # Make a horizontal slider to control the frequency.
+    # Create sliders
     sliders = []
     for i, param in enumerate(params.keys()):
         slider_ax = fig.add_axes((0.1, BOTTOM_PADDING[0] + SLIDER_HEIGHT * (len(params) - 1 - i), 0.6, 0.03))
@@ -71,7 +71,7 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
             axs.relim()
             axs.autoscale_view(True, True, True)
 
-    # register the update function with each slider
+    # Register the update function with each slider
     [slider.on_changed(update) for slider in sliders]
 
     # Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
@@ -82,7 +82,9 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
         [slider.reset() for slider in sliders]
 
     button.on_clicked(reset)
+
     fig._sliderplot_button = button  # Prevent garbage collector from deleting button behavior
+
     if show:
         plt.show()
     return fig, axs
