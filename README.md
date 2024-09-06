@@ -2,8 +2,9 @@
 
 Turn a function into an interactive plot with a single line of code.
 
-<img src="https://github.com/ngripon/sliderplot/blob/main/demo.gif" width="600" alt="demo" 
-style="margin: 0 auto; display: block" />
+<p align="center">
+    <img src="https://github.com/ngripon/sliderplot/blob/main/demo.gif" width="600" alt="demo" />
+</p>
 
 ``` python
     def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
