@@ -1,4 +1,4 @@
-import collections.abc
+import enum
 import inspect
 from inspect import signature
 
@@ -10,6 +10,13 @@ SLIDER_HEIGHT = 0.05
 BOTTOM_PADDING = (0.03, 0.1)
 
 
+class PlotMode(enum.Enum):
+    LINE_X = 0
+    LINE_XY = 1
+    MULTI_LINE = 2
+    MULTI_PLOT = 3
+
+
 def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=True, wrapper=None):
     # Get init parameters
     params = signature(f).parameters
@@ -17,7 +24,7 @@ def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=Tr
                    params.values()]
 
     outputs = f(*init_params)
-    fig, axs, lines = create_plot(outputs)
+    fig, axs, lines, plot_mode = create_plot(outputs)
 
     # adjust the main plot to make room for the sliders
     fig.subplots_adjust(bottom=sum(BOTTOM_PADDING) + len(params) * SLIDER_HEIGHT)
@@ -25,7 +32,7 @@ def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=Tr
     # Make a horizontal slider to control the frequency.
     sliders = []
     for i, param in enumerate(params.keys()):
-        slider_ax = fig.add_axes([0.1, BOTTOM_PADDING[0] + SLIDER_HEIGHT * (len(params) - 1 - i), 0.6, 0.03])
+        slider_ax = fig.add_axes((0.1, BOTTOM_PADDING[0] + SLIDER_HEIGHT * (len(params) - 1 - i), 0.6, 0.03))
         if i < len(params_bounds):
             val_min, val_max = params_bounds[i]
         else:
@@ -46,7 +53,7 @@ def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=Tr
         except ZeroDivisionError:
             return
 
-        for line, (x, y) in zip(lines, get_lines(outputs)):
+        for line, (x, y) in zip(lines, get_lines(outputs, plot_mode)):
             line.set_data(x, y)
         fig.canvas.draw_idle()
         if hasattr(axs, "__len__"):
@@ -60,8 +67,8 @@ def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=Tr
     [slider.on_changed(update) for slider in sliders]
 
     # Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
-    resetax = fig.add_axes([0.8, BOTTOM_PADDING[0] + (len(params) - 1) * SLIDER_HEIGHT, 0.1, 0.04])
-    button = Button(resetax, 'Reset', hovercolor='0.975')
+    reset_ax = fig.add_axes((0.8, BOTTOM_PADDING[0] + (len(params) - 1) * SLIDER_HEIGHT, 0.1, 0.04))
+    button = Button(reset_ax, 'Reset', hovercolor='0.975')
 
     def reset(event):
         [slider.reset() for slider in sliders]
@@ -71,6 +78,16 @@ def sliderplot(f, params_bounds=(), x_labels=(), y_labels=(), titles=(), show=Tr
     if show:
         plt.show()
     return fig, axs
+
+
+def get_plot_mode(output_data) -> PlotMode:
+    plot_mode_map = {1: PlotMode.LINE_X, 2: PlotMode.LINE_XY, 3: PlotMode.MULTI_LINE, 4: PlotMode.MULTI_PLOT}
+    depth = compute_depth(output_data)
+    if depth in plot_mode_map.keys():
+        return plot_mode_map[depth]
+    else:
+        raise Exception("Failed to transform the output data of the function into plots. "
+                        "Please look at the documentation for correct data formatting.")
 
 
 def compute_depth(data) -> int:
@@ -86,48 +103,46 @@ def compute_depth(data) -> int:
     return depth
 
 
+# TODO: raise exceptions in invalid cases
 def create_plot(outputs):
     lines = []
-    outputs_depth = compute_depth(outputs)
-    n_plots = 1 if outputs_depth < 4 else len(outputs)
+    plot_mode = get_plot_mode(outputs)
+    n_plots = len(outputs) if plot_mode is PlotMode.MULTI_PLOT else 1
     fig, axs = plt.subplots(ncols=n_plots)
-    if n_plots == 1:
-        axs.grid()
-        if outputs_depth == 3:
-            for x, y in outputs:
-                line, = axs.plot(x, y, lw=2)
-                lines.append(line)
-        elif outputs_depth == 2:
-            line, = axs.plot(outputs[0], outputs[1], lw=2)
-            lines.append(line)
-        elif outputs_depth == 1:
-            x = np.arange(len(outputs))
-            line, = axs.plot(x, outputs, lw=2)
-            lines.append(line)
-    else:
+    if plot_mode is PlotMode.MULTI_PLOT:  # axs is an array of Axes objects
         for ax, subplot_data in zip(axs, outputs):
             ax.grid()
             for x, y in subplot_data:
                 line, = ax.plot(x, y, lw=2)
                 lines.append(line)
-    return fig, axs, lines
+    else:  # axs is an Axes object
+        axs.grid()
+        if plot_mode is PlotMode.MULTI_LINE:
+            for x, y in outputs:
+                line, = axs.plot(x, y, lw=2)
+                lines.append(line)
+        elif plot_mode is PlotMode.LINE_XY:
+            line, = axs.plot(outputs[0], outputs[1], lw=2)
+            lines.append(line)
+        elif plot_mode is PlotMode.LINE_X:
+            x = np.arange(len(outputs))
+            line, = axs.plot(x, outputs, lw=2)
+            lines.append(line)
+    return fig, axs, lines, plot_mode
 
 
-def get_lines(outputs):
-    outputs_depth = compute_depth(outputs)
-    if outputs_depth == 3:
+def get_lines(outputs, plot_mode: PlotMode):
+    if plot_mode is PlotMode.MULTI_LINE:
         return outputs
-    elif outputs_depth == 2:
+    elif plot_mode is PlotMode.LINE_XY:
         return ((outputs[0], outputs[1]),)
-    elif outputs_depth == 1:
+    elif plot_mode is PlotMode.LINE_X:
         x = np.arange(len(outputs))
         return ((x, outputs),)
-    elif outputs_depth == 4:
-        lines_xy = []
-        for subplot_data in outputs:
-            for x, y in subplot_data:
-                lines_xy.append((x, y))
-        return lines_xy
+    elif plot_mode is PlotMode.MULTI_PLOT:
+        return np.concatenate((*outputs,))
+    else:
+        raise Exception("Invalid plot_mode argument.")
 
 
 if __name__ == '__main__':
