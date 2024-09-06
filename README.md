@@ -1,6 +1,6 @@
 # sliderplot
 
-Create matplotlib interactive plot from a simple function with a single line of code.
+Create matplotlib interactive plot from a function with a single line of code.
 
 ``` python
     def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
@@ -9,6 +9,5 @@ Create matplotlib interactive plot from a simple function with a single line of 
         return x, y
 
 
-    fig, axs = sliderplot(f, params_bounds=((0, 10), (0, 10 * np.pi), (0, 2 * np.pi)), show=True)
-
+    sliderplot(f, params_bounds=((0, 10), (0, 10 * np.pi), (0, 2 * np.pi)), show=True)
 ```
