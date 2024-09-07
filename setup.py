@@ -5,7 +5,7 @@ with open("README.md", "r", encoding = "utf-8") as fh:
 
 setuptools.setup(
     name = "sliderplot",
-    version = "0.0.1",
+    version = "0.0.2",
     author = "Nathan Gripon",
     author_email = "n.gripon@gmail.com",
     description = "Turn a function into an interactive plot with a single line of code",
