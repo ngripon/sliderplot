@@ -33,7 +33,7 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     outputs = f(*init_params)
 
     # Create plot
-    fig, axs, lines, plot_mode = create_plot(outputs)
+    fig, axs, lines, plot_mode = _create_plot(outputs)
     # Adjust the main plot to make room for the sliders
     fig.subplots_adjust(bottom=sum(BOTTOM_PADDING) + len(params) * SLIDER_HEIGHT)
 
@@ -61,7 +61,7 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
         except ZeroDivisionError:
             return
 
-        for line, (x, y) in zip(lines, get_lines(outputs, plot_mode)):
+        for line, (x, y) in zip(lines, _get_lines(outputs, plot_mode)):
             line.set_data(x, y)
         fig.canvas.draw_idle()
         if hasattr(axs, "__len__"):
@@ -90,9 +90,9 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     return fig, axs
 
 
-def get_plot_mode(output_data) -> PlotMode:
+def _get_plot_mode(output_data) -> PlotMode:
     plot_mode_map = {1: PlotMode.LINE_X, 2: PlotMode.LINE_XY, 3: PlotMode.MULTI_LINE, 4: PlotMode.MULTI_PLOT}
-    depth = compute_depth(output_data)
+    depth = _compute_depth(output_data)
     if depth in plot_mode_map.keys():
         return plot_mode_map[depth]
     else:
@@ -100,7 +100,7 @@ def get_plot_mode(output_data) -> PlotMode:
                         "Please look at the documentation for correct data formatting.")
 
 
-def compute_depth(data) -> int:
+def _compute_depth(data) -> int:
     # TODO: check depth of all elements
     depth = 0
     current_element = data
@@ -113,9 +113,9 @@ def compute_depth(data) -> int:
     return depth
 
 
-def create_plot(outputs):
+def _create_plot(outputs):
     lines = []
-    plot_mode = get_plot_mode(outputs)
+    plot_mode = _get_plot_mode(outputs)
     n_plots = len(outputs) if plot_mode is PlotMode.MULTI_PLOT else 1
     fig, axs = plt.subplots(ncols=n_plots)
     if plot_mode is PlotMode.MULTI_PLOT:  # axs is an array of Axes objects
@@ -140,7 +140,7 @@ def create_plot(outputs):
     return fig, axs, lines, plot_mode
 
 
-def get_lines(outputs, plot_mode: PlotMode):
+def _get_lines(outputs, plot_mode: PlotMode):
     if plot_mode is PlotMode.MULTI_LINE:
         return outputs
     elif plot_mode is PlotMode.LINE_XY:
@@ -162,6 +162,3 @@ if __name__ == '__main__':
 
 
     fig, axs = sliderplot(f, params_bounds=((0, 10), (0, 10 * np.pi), (0, 2 * np.pi)))
-
-    # axs[0].set_title("Hey")
-    # plt.show()
