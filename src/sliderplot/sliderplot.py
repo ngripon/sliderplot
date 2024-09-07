@@ -3,8 +3,6 @@ import enum
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sliderplot import sliderplot
-
 SLIDER_HEIGHT = 0.05
 BOTTOM_PADDING = (0.03, 0.1)
 
@@ -78,13 +76,3 @@ def _get_lines(outputs, plot_mode: _PlotMode):
         return np.concatenate((*outputs,))
     else:
         raise Exception("Invalid plot_mode argument.")
-
-
-if __name__ == '__main__':
-    def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
-        x = np.linspace(0, 10, 1000)
-        y = amplitude * np.sin(frequency * x + phase)
-        return x, y
-
-
-    fig, axs = sliderplot(f, params_bounds=((0, 10), (0, 10 * np.pi), (0, 2 * np.pi)))

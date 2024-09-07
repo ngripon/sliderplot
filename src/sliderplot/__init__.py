@@ -45,13 +45,13 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
         sliders.append(slider)
 
     # The function to be called anytime a slider's value changes
-    def update(_):
+    def update(event=None):
         try:
-            outputs = f(*(slider.val for slider in sliders))
+            new_outputs = f(*(slider.val for slider in sliders))
         except ZeroDivisionError:
             return
 
-        for line, (x, y) in zip(lines, _get_lines(outputs, plot_mode)):
+        for line, (x, y) in zip(lines, _get_lines(new_outputs, plot_mode)):
             line.set_data(x, y)
         fig.canvas.draw_idle()
         if hasattr(axs, "__len__"):
@@ -68,7 +68,7 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     reset_ax = fig.add_axes((0.85, BOTTOM_PADDING[0] + (len(params) - 1) * SLIDER_HEIGHT, 0.1, 0.04))
     button = Button(reset_ax, 'Reset', hovercolor='0.975')
 
-    def reset(event):
+    def reset(event=None):
         [slider.reset() for slider in sliders]
 
     button.on_clicked(reset)
