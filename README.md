@@ -3,7 +3,7 @@
 Turn a function into an interactive plot with a single line of code.
 
 <p align="center">
-    <img src="https://github.com/ngripon/sliderplot/blob/main/demo.gif" width="520" alt="demo" />
+    <img src="https://github.com/ngripon/sliderplot/raw/main/demo.gif" width="520" alt="demo" />
 </p>
 
 ``` python
