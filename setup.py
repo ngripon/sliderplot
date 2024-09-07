@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type = "text/markdown",
     url = "https://github.com/ngripon/sliderplot",
     project_urls = {
-        "Bug Tracker": "package issues URL",
+        "Bug Tracker": "https://github.com/ngripon/sliderplot/issues",
     },
     classifiers = [
         "Programming Language :: Python :: 3",
