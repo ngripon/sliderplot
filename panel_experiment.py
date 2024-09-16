@@ -6,7 +6,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 matplotlib.use("agg")
-pn.extension()
+pn.extension(design="material")
 
 def display_plot(k):
     x = np.linspace(0, 10, 101)
@@ -25,4 +25,10 @@ fig=pn.bind(display_plot, k=slider)
 
 plot = pn.pane.Matplotlib(fig, format="svg", tight=True, sizing_mode="stretch_width")
 
-pn.Row(slider, plot).show()
+pn.Row(slider, plot)
+
+pn.template.MaterialTemplate(
+    title="hello world",
+    sidebar=slider,
+    main=plot
+).show()
