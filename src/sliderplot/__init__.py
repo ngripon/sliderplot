@@ -2,6 +2,7 @@ import inspect
 from inspect import signature
 from typing import Callable
 
+import matplotlib
 import panel as pn
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider, Button
@@ -21,7 +22,8 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
     init_params = [param.default if param.default is not inspect.Parameter.empty else 1 for param in
                    params.values()]
 
-
+    matplotlib.use("agg")
+    pn.extension(design="material")
 
     # Create sliders
     sliders = []
@@ -44,7 +46,7 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
 
     fig= pn.bind(simulate,*sliders)
 
-    plot = pn.panel(fig, format="svg", tight=True, sizing_mode="stretch_width")
+    plot = pn.panel(fig, format="svg", tight=True, sizing_mode="stretch_both")
 
 
     pn.template.MaterialTemplate(
