@@ -32,7 +32,7 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
             val_min, val_max = params_bounds[i]
         else:
             val_min, val_max = 0, 20
-        slider = pn.widgets.FloatSlider(value=init_params[i], start=val_min, end=val_max, name=param)
+        slider = pn.widgets.EditableFloatSlider(value=init_params[i], start=val_min, end=val_max, name=param)
         sliders.append(slider)
 
 
