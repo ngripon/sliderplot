@@ -3,6 +3,7 @@
 
 
 **This project has been closed because what it wanted to achieve already exists : https://holoviews.org/reference/containers/bokeh/DynamicMap.html**
+
 Turn a function into an interactive plot with a single line of code.
 
 # Demo
