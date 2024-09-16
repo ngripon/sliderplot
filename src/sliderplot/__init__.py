@@ -2,11 +2,56 @@ import inspect
 from inspect import signature
 from typing import Callable
 
+import panel as pn
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider, Button
 
 from sliderplot.sliderplot import _create_plot, BOTTOM_PADDING, SLIDER_HEIGHT, _get_lines
 
+def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
+    """
+    Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
+    :param f: Function to explore.
+    :param params_bounds: Sequence of (val_min, val_max) bounds for each parameter of the function f.
+    :param show: If True, show the plot.
+    :return: fig and axs (Axes object if there is one subplot, and list of Axes if there are multiple subplots).
+    """
+    # Get init parameters
+    params = signature(f).parameters
+    init_params = [param.default if param.default is not inspect.Parameter.empty else 1 for param in
+                   params.values()]
+
+
+
+    # Create sliders
+    sliders = []
+    for i, param in enumerate(params.keys()):
+        if i < len(params_bounds):
+            val_min, val_max = params_bounds[i]
+        else:
+            val_min, val_max = 0, 20
+        slider = pn.widgets.FloatSlider(value=init_params[i], start=val_min, end=val_max, name=param)
+        sliders.append(slider)
+
+
+    def simulate(*args):
+        try:
+            outputs = f(*args)
+        except ZeroDivisionError:
+            return
+        fig, axs, lines, plot_mode = _create_plot(outputs)
+        return fig
+
+    fig= pn.bind(simulate,*sliders)
+
+    plot = pn.panel(fig, format="svg", tight=True, sizing_mode="stretch_width")
+
+
+    pn.template.MaterialTemplate(
+        title="Sliderplot",
+        sidebar=sliders,
+        main=plot,
+    ).show()
 
 def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     """

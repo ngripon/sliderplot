@@ -1,6 +1,6 @@
 import pytest
 
-from sliderplot import sliderplot
+from sliderplot import sliderplot, sliderplot_panel
 import numpy as np
 
 
@@ -10,4 +10,4 @@ def test_minimal_example():
         y = amplitude * np.sin(frequency * x + phase)
         return x, y
 
-    sliderplot(f)
+    sliderplot_panel(f)
