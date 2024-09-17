@@ -41,7 +41,7 @@ def _create_plot(outputs):
     lines = []
     plot_mode = _get_plot_mode(outputs)
     n_plots = len(outputs) if plot_mode is _PlotMode.MULTI_PLOT else 1
-    fig, axs = plt.subplots(ncols=n_plots)
+    fig, axs = plt.subplots(nrows=n_plots)
     if plot_mode is _PlotMode.MULTI_PLOT:  # axs is an array of Axes objects
         for ax, subplot_data in zip(axs, outputs):
             ax.grid()

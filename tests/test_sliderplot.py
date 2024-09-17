@@ -11,3 +11,21 @@ def test_minimal_example():
         return x, y
 
     sliderplot_panel(f)
+
+
+def test_multiple_lines():
+    def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+        x = np.linspace(0, 10, 1000)
+        y = amplitude * np.sin(frequency * x + phase)
+        return (x, y), (2 * x, 2 * y)
+
+    sliderplot_panel(f)
+
+
+def test_multiple_plots():
+    def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+        x = np.linspace(0, 10, 1000)
+        y = amplitude * np.sin(frequency * x + phase)
+        return ((x, y),), ((x, 2 * y), (x, x + y))
+
+    sliderplot_panel(f)
