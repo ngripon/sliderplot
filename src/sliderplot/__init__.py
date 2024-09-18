@@ -3,11 +3,13 @@ from inspect import signature
 from typing import Callable
 
 import panel as pn
+from bokeh.models import BasicTickFormatter
 
 from sliderplot.sliderplot import _BOTTOM_PADDING, _SLIDER_HEIGHT, _get_lines, \
     _create_bokeh_plot
 
 _N_POINTS_PER_SLIDER = 1000
+
 
 def sliderplot(f: Callable, params_bounds=()):
     """
@@ -32,7 +34,8 @@ def sliderplot(f: Callable, params_bounds=()):
         else:
             val_min, val_max = 0, 20
         slider = pn.widgets.EditableFloatSlider(value=init_params[i], start=val_min, end=val_max, name=param,
-                                                step=(val_max - val_min) / _N_POINTS_PER_SLIDER)
+                                                step=(val_max - val_min) / _N_POINTS_PER_SLIDER,
+                                                format=BasicTickFormatter(precision=4))
         sliders.append(slider)
 
     fig, lines_source, plot_mode = _create_bokeh_plot(outputs)
