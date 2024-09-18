@@ -40,23 +40,22 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
         slider = pn.widgets.EditableFloatSlider(value=init_params[i], start=val_min, end=val_max, name=param)
         sliders.append(slider)
 
+    source = ColumnDataSource(data=dict(x=[0], y=[0]))
+    curv = figure(title="my sine wave",
+                  tools="crosshair,pan,reset,save,wheel_zoom", sizing_mode="stretch_both")
+    curv.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
+
     def simulate(*args):
         try:
             outputs = f(*args)
         except ZeroDivisionError:
             return
-        source = ColumnDataSource(data=dict(x=outputs[0], y=outputs[1]))
-        curv = figure(title="my sine wave",
-                       tools="crosshair,pan,reset,save,wheel_zoom", sizing_mode="stretch_both")
-        curv.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
-        # fig, axs, lines, plot_mode = _create_plot(outputs)
+        source.data = dict(x=outputs[0], y=outputs[1])
         return curv
 
     curve = pn.bind(simulate, *sliders)
 
     plot = pn.pane.Bokeh(curve, sizing_mode="stretch_both")
-
-    # plot = pn.panel(fig, format="svg", tight=True, sizing_mode="stretch_both")
 
     pn.template.MaterialTemplate(
         title="Sliderplot",
