@@ -17,7 +17,7 @@ def test_multiple_lines():
     def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
         x = np.linspace(0, 10, 1000)
         y = amplitude * np.sin(frequency * x + phase)
-        return (x, y), (2 * x, 2 * y)
+        return (x, y, "Yeah"), (2 * x, 2 * y, "Yo")
 
     sliderplot(f, titles=("Multiple lines",), axes_labels=(('Time', "Something"),))
 

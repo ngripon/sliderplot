@@ -62,6 +62,8 @@ def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (),
     sliders[0].value = init_params[0] + 0.0000000001
     sliders[0].value = init_params[0]
 
+
+
     server = pn.template.MaterialTemplate(
         title="Sliderplot",
         sidebar=sliders,

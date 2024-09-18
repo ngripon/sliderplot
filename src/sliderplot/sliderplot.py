@@ -3,9 +3,10 @@ import itertools
 
 import numpy as np
 from bokeh.layouts import column
-from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models import ColumnDataSource, HoverTool, LegendItem, Legend
 from bokeh.plotting import figure
 from bokeh.palettes import d3
+from plotly.io import renderers
 
 _SLIDER_HEIGHT = 0.05
 _BOTTOM_PADDING = (0.03, 0.1)
@@ -54,7 +55,8 @@ def _create_bokeh_plot(outputs, titles=(), labels_list=()):
             colors = itertools.cycle(d3["Category20"][19])
             # Create lines
             for x, y in subplot_data:
-                sub_fig, line_source = _create_bokeh_figure(x, y, colors, fig=sub_fig, title=title, labels=labels)
+                sub_fig, line_source, legend_item = _create_bokeh_figure(x, y, colors, fig=sub_fig, title=title,
+                                                                         labels=labels)
                 lines_source.append(line_source)
             figs.append(sub_fig)
         fig = column(*figs)
@@ -64,15 +66,22 @@ def _create_bokeh_plot(outputs, titles=(), labels_list=()):
         if plot_mode is _PlotMode.MULTI_LINE:
             fig = None
             colors = itertools.cycle(d3["Category20"][19])
-            for x, y in outputs:
-                fig, line_source = _create_bokeh_figure(x, y, fig=fig, colors=colors, title=title, labels=labels)
+            legend_items = []
+            for line_data in outputs:
+                x, y = line_data[:2]
+                legend = line_data[2] if len(line_data) > 2 else None
+                fig, line_source, legend_item = _create_bokeh_figure(x, y, fig=fig, colors=colors, title=title,
+                                                                     labels=labels, legend=legend)
                 lines_source.append(line_source)
+                if legend_item is not None:
+                    legend_items.append(legend_item)
+            fig.add_layout(Legend(items=legend_items, click_policy="mute"))
         elif plot_mode is _PlotMode.LINE_XY:
-            fig, line_source = _create_bokeh_figure(outputs[0], outputs[1], title=title, labels=labels)
+            fig, line_source, legend_item = _create_bokeh_figure(outputs[0], outputs[1], title=title, labels=labels)
             lines_source.append(line_source)
         elif plot_mode is _PlotMode.LINE_X:
             x = np.arange(len(outputs))
-            fig, line_source = _create_bokeh_figure(x, outputs, title=title, labels=labels)
+            fig, line_source, legend_item = _create_bokeh_figure(x, outputs, title=title, labels=labels)
             lines_source.append(line_source)
         else:
             raise Exception(f"This mode is not supported: {plot_mode}")
@@ -85,7 +94,7 @@ TOOLTIPS = [
 ]
 
 
-def _create_bokeh_figure(x, y, colors=None, fig=None, title=None, labels: tuple[str, str] = ()):
+def _create_bokeh_figure(x, y, colors, fig=None, title: str = None, labels: tuple[str, str] = (), legend: str = None):
     line_source = ColumnDataSource(data=dict(x=x, y=y))
     if fig is None:
         fig = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
@@ -101,17 +110,17 @@ def _create_bokeh_figure(x, y, colors=None, fig=None, title=None, labels: tuple[
                 fig.yaxis[0].axis_label = axis_label
             else:
                 break
-    if colors is not None:
-        fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
-        _ = next(colors)  # Trick to use last the uneven colors of the palette
-    else:
-        fig.line('x', 'y', source=line_source, line_width=3)
-    return fig, line_source
+    r = fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
+    _ = next(colors)  # Trick to use last the uneven colors of the palette
+    legend_item = None
+    if legend:
+        legend_item = LegendItem(label=legend, renderers=[r])
+    return fig, line_source, legend_item
 
 
 def _get_lines(outputs, plot_mode: _PlotMode):
     if plot_mode is _PlotMode.MULTI_LINE:
-        return outputs
+        return (x[:2] for x in outputs)
     elif plot_mode is _PlotMode.LINE_XY:
         return ((outputs[0], outputs[1]),)
     elif plot_mode is _PlotMode.LINE_X:
