@@ -1,9 +1,11 @@
 import inspect
+from collections.abc import Sequence
 from inspect import signature
 from typing import Callable
 
 import panel as pn
 from bokeh.models import BasicTickFormatter
+from plotly.graph_objs.indicator import Number
 
 from sliderplot.sliderplot import _BOTTOM_PADDING, _SLIDER_HEIGHT, _get_lines, \
     _create_bokeh_plot
@@ -11,11 +13,14 @@ from sliderplot.sliderplot import _BOTTOM_PADDING, _SLIDER_HEIGHT, _get_lines, \
 _N_POINTS_PER_SLIDER = 1000
 
 
-def sliderplot(f: Callable, params_bounds=()):
+def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (), titles: Sequence[str] = (),
+               axes_labels: Sequence[tuple[str, str]] = ()):
     """
     Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
     :param f: Function to explore.
     :param params_bounds: Sequence of (val_min, val_max) bounds for each parameter of the function f.
+    :param titles:
+    :param axes_labels:
     :return: fig and axs (Axes object if there is one subplot, and list of Axes if there are multiple subplots).
     """
     # Get init parameters
@@ -38,7 +43,7 @@ def sliderplot(f: Callable, params_bounds=()):
                                                 format=BasicTickFormatter(precision=4))
         sliders.append(slider)
 
-    fig, lines_source, plot_mode = _create_bokeh_plot(outputs)
+    fig, lines_source, plot_mode = _create_bokeh_plot(outputs, titles, axes_labels)
 
     def simulate(*args):
         try:
@@ -56,6 +61,8 @@ def sliderplot(f: Callable, params_bounds=()):
     # Dirty trick to fix bug that make the plot empty when init with multiple plots
     sliders[0].value = init_params[0] + 0.0000000001
     sliders[0].value = init_params[0]
+
+
 
     server = pn.template.MaterialTemplate(
         title="Sliderplot",

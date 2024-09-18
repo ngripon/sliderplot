@@ -1,11 +1,14 @@
 import enum
 import itertools
+from numbers import Number
 
 import numpy as np
 from bokeh.layouts import column
-from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.models import ColumnDataSource, HoverTool, LegendItem, Legend
 from bokeh.plotting import figure
 from bokeh.palettes import d3
+from jedi.inference.value.iterable import Sequence
+from plotly.io import renderers
 
 _SLIDER_HEIGHT = 0.05
 _BOTTOM_PADDING = (0.03, 0.1)
@@ -41,36 +44,56 @@ def _compute_depth(data) -> int:
     return depth
 
 
-def _create_bokeh_plot(outputs):
+def _create_bokeh_plot(outputs, titles=(), labels_list=()):
     lines_source = []
     plot_mode = _get_plot_mode(outputs)
     if plot_mode is _PlotMode.MULTI_PLOT:
         figs = []
-        for subplot_data in outputs:
-            sub_fig = None
-            colors = itertools.cycle(d3["Category20"][19])
-            for x, y in subplot_data:
-                sub_fig, line_source = _create_bokeh_figure(x, y, colors, fig=sub_fig)
-                lines_source.append(line_source)
+        for subplot_idx, subplot_data in enumerate(outputs):
+            # Manage aesthetics
+            title = titles[subplot_idx] if subplot_idx < len(titles) else None
+            labels = labels_list[subplot_idx] if subplot_idx < len(labels_list) else ()
+            # Create lines
+            sub_fig, sub_line_sources = _create_bokeh_multiline_figure(subplot_data, title, labels)
+            lines_source.extend(sub_line_sources)
             figs.append(sub_fig)
         fig = column(*figs)
     else:
+        title = titles[0] if len(titles) else None
+        labels = labels_list[0] if len(labels_list) else ()
         if plot_mode is _PlotMode.MULTI_LINE:
-            fig = None
-            colors = itertools.cycle(d3["Category20"][19])
-            for x, y in outputs:
-                fig, line_source = _create_bokeh_figure(x, y, fig=fig, colors=colors)
-                lines_source.append(line_source)
+            fig, lines_source = _create_bokeh_multiline_figure(outputs, title=title, labels=labels)
         elif plot_mode is _PlotMode.LINE_XY:
-            fig, line_source = _create_bokeh_figure(outputs[0], outputs[1])
+            legend = outputs[2] if len(outputs) > 2 else None
+            fig, line_source, legend_item = _create_bokeh_figure(outputs[0], outputs[1], title=title, labels=labels,
+                                                                 legend=legend)
+            fig.add_layout(Legend(items=[legend_item], click_policy="mute"))
             lines_source.append(line_source)
         elif plot_mode is _PlotMode.LINE_X:
             x = np.arange(len(outputs))
-            fig, line_source = _create_bokeh_figure(x, outputs)
+            fig, line_source, legend_item = _create_bokeh_figure(x, outputs, title=title, labels=labels)
             lines_source.append(line_source)
         else:
             raise Exception(f"This mode is not supported: {plot_mode}")
     return fig, lines_source, plot_mode
+
+
+def _create_bokeh_multiline_figure(data: Sequence(tuple[Number, Number, str]), title: str, labels: tuple[str, str]):
+    fig = None
+    lines_sources = []
+    legend_items = []
+    colors = itertools.cycle(d3["Category20"][19])
+    # Create lines
+    for line_data in data:
+        x, y = line_data[:2]
+        legend = line_data[2] if len(line_data) > 2 else None
+        fig, line_source, legend_item = _create_bokeh_figure(x, y, colors, fig=fig, title=title,
+                                                             labels=labels, legend=legend)
+        lines_sources.append(line_source)
+        if legend_item is not None:
+            legend_items.append(legend_item)
+    fig.add_layout(Legend(items=legend_items, click_policy="mute"))
+    return fig, lines_sources
 
 
 TOOLTIPS = [
@@ -79,28 +102,41 @@ TOOLTIPS = [
 ]
 
 
-def _create_bokeh_figure(x, y, colors=None, fig=None):
+def _create_bokeh_figure(x, y, colors=None, fig=None, title: str = None, labels: tuple[str, str] = (),
+                         legend: str = None):
     line_source = ColumnDataSource(data=dict(x=x, y=y))
     if fig is None:
         fig = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
         fig.add_tools(HoverTool(tooltips=TOOLTIPS))
-    if colors is not None:
-        fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
+        if title is not None:
+            fig.title.text = title
+        for axis_idx, axis_label in enumerate(labels):
+            if axis_label is None:
+                continue
+            if axis_idx == 0:
+                fig.xaxis[0].axis_label = axis_label
+            elif axis_idx == 1:
+                fig.yaxis[0].axis_label = axis_label
+            else:
+                break
+    r = fig.line('x', 'y', source=line_source, line_width=3)
+    if colors:
+        r.glyph.line_color = next(colors)
         _ = next(colors)  # Trick to use last the uneven colors of the palette
-    else:
-        fig.line('x', 'y', source=line_source, line_width=3)
-    return fig, line_source
+    legend_item = LegendItem(label=legend, renderers=[r]) if legend is not None else None
+    return fig, line_source, legend_item
 
 
 def _get_lines(outputs, plot_mode: _PlotMode):
     if plot_mode is _PlotMode.MULTI_LINE:
-        return outputs
+        return (x[:2] for x in outputs)
     elif plot_mode is _PlotMode.LINE_XY:
         return ((outputs[0], outputs[1]),)
     elif plot_mode is _PlotMode.LINE_X:
         x = np.arange(len(outputs))
         return ((x, outputs),)
     elif plot_mode is _PlotMode.MULTI_PLOT:
-        return np.concatenate((*outputs,))
+        formatted_outputs = map(lambda l: [x[:2] for x in l], outputs)
+        return np.concatenate((*formatted_outputs,))
     else:
         raise Exception("Invalid plot_mode argument.")
