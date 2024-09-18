@@ -64,7 +64,10 @@ def _create_bokeh_plot(outputs, titles=(), labels_list=()):
         if plot_mode is _PlotMode.MULTI_LINE:
             fig, lines_source = _create_bokeh_multiline_figure(outputs, title=title, labels=labels)
         elif plot_mode is _PlotMode.LINE_XY:
-            fig, line_source, legend_item = _create_bokeh_figure(outputs[0], outputs[1], title=title, labels=labels)
+            legend = outputs[2] if len(outputs) > 2 else None
+            fig, line_source, legend_item = _create_bokeh_figure(outputs[0], outputs[1], title=title, labels=labels,
+                                                                 legend=legend)
+            fig.add_layout(Legend(items=[legend_item], click_policy="mute"))
             lines_source.append(line_source)
         elif plot_mode is _PlotMode.LINE_X:
             x = np.arange(len(outputs))
@@ -133,6 +136,7 @@ def _get_lines(outputs, plot_mode: _PlotMode):
         x = np.arange(len(outputs))
         return ((x, outputs),)
     elif plot_mode is _PlotMode.MULTI_PLOT:
-        return np.concatenate((*outputs,))
+        formatted_outputs = map(lambda l: [x[:2] for x in l], outputs)
+        return np.concatenate((*formatted_outputs,))
     else:
         raise Exception("Invalid plot_mode argument.")
