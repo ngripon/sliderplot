@@ -46,16 +46,15 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
         except ZeroDivisionError:
             return
         source = ColumnDataSource(data=dict(x=outputs[0], y=outputs[1]))
-        curv = figure(height=400, width=400, title="my sine wave",
-                       tools="crosshair,pan,reset,save,wheel_zoom",
-                       x_range=[0, 4 * np.pi], y_range=[-2.5, 2.5])
+        curv = figure(title="my sine wave",
+                       tools="crosshair,pan,reset,save,wheel_zoom", sizing_mode="stretch_both")
         curv.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
         # fig, axs, lines, plot_mode = _create_plot(outputs)
         return curv
 
     curve = pn.bind(simulate, *sliders)
 
-    plot = pn.pane.Bokeh(curve)
+    plot = pn.pane.Bokeh(curve, sizing_mode="stretch_both")
 
     # plot = pn.panel(fig, format="svg", tight=True, sizing_mode="stretch_both")
 
