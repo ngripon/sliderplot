@@ -1,9 +1,8 @@
 import enum
 import itertools
 
-import matplotlib.pyplot as plt
 import numpy as np
-from bokeh.layouts import column, row
+from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.palettes import d3
@@ -42,33 +41,6 @@ def _compute_depth(data) -> int:
     return depth
 
 
-def _create_matplotlib_plot(outputs):
-    lines = []
-    plot_mode = _get_plot_mode(outputs)
-    n_plots = len(outputs) if plot_mode is _PlotMode.MULTI_PLOT else 1
-    fig, axs = plt.subplots(nrows=n_plots)
-    if plot_mode is _PlotMode.MULTI_PLOT:  # axs is an array of Axes objects
-        for ax, subplot_data in zip(axs, outputs):
-            ax.grid()
-            for x, y in subplot_data:
-                line, = ax.plot(x, y, lw=2)
-                lines.append(line)
-    else:  # axs is an Axes object
-        axs.grid()
-        if plot_mode is _PlotMode.MULTI_LINE:
-            for x, y in outputs:
-                line, = axs.plot(x, y, lw=2)
-                lines.append(line)
-        elif plot_mode is _PlotMode.LINE_XY:
-            line, = axs.plot(outputs[0], outputs[1], lw=2)
-            lines.append(line)
-        elif plot_mode is _PlotMode.LINE_X:
-            x = np.arange(len(outputs))
-            line, = axs.plot(x, outputs, lw=2)
-            lines.append(line)
-    return fig, axs, lines, plot_mode
-
-
 def _create_bokeh_plot(outputs):
     lines_source = []
     plot_mode = _get_plot_mode(outputs)
@@ -79,10 +51,10 @@ def _create_bokeh_plot(outputs):
             sub_fig = None
             colors = itertools.cycle(d3["Category20"][19])
             for x, y in subplot_data:
-                sub_fig, line_source = _create_bokeh_figure(x, y,colors, fig=sub_fig)
+                sub_fig, line_source = _create_bokeh_figure(x, y, colors, fig=sub_fig)
                 lines_source.append(line_source)
             figs.append(sub_fig)
-        fig = row(*figs)
+        fig = column(*figs)
     else:
         if plot_mode is _PlotMode.MULTI_LINE:
             fig = None
@@ -114,7 +86,7 @@ def _create_bokeh_figure(x, y, colors=None, fig=None):
         fig.add_tools(HoverTool(mode="vline", tooltips=TOOLTIPS))
     if colors is not None:
         fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
-        _ =next(colors)
+        _ = next(colors)  # Trick to use last the uneven colors of the palette
     else:
         fig.line('x', 'y', source=line_source, line_width=3)
     return fig, line_source

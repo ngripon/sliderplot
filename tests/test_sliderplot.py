@@ -1,6 +1,6 @@
 import pytest
 
-from sliderplot import sliderplot, sliderplot_panel
+from sliderplot import sliderplot
 import numpy as np
 
 
@@ -10,7 +10,7 @@ def test_minimal_example():
         y = amplitude * np.sin(frequency * x + phase)
         return x, y
 
-    sliderplot_panel(f, params_bounds=((0, 1),))
+    sliderplot(f, params_bounds=((0, 1),))
 
 
 def test_multiple_lines():
@@ -19,7 +19,7 @@ def test_multiple_lines():
         y = amplitude * np.sin(frequency * x + phase)
         return (x, y), (2 * x, 2 * y)
 
-    sliderplot_panel(f)
+    sliderplot(f)
 
 
 def test_multiple_plots():
@@ -28,7 +28,7 @@ def test_multiple_plots():
         y = amplitude * np.sin(frequency * x + phase)
         return ((x, y),), ((x, 2 * y), (x, x + y))
 
-    sliderplot_panel(f)
+    sliderplot(f)
 
 
 def test_lot_of_lines():
@@ -40,4 +40,4 @@ def test_lot_of_lines():
             multi_lines.append((x, i * y))
         return ((x, y),), multi_lines
 
-    sliderplot_panel(f)
+    sliderplot(f)

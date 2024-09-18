@@ -2,24 +2,18 @@ import inspect
 from inspect import signature
 from typing import Callable
 
-import matplotlib
-import numpy as np
 import panel as pn
-from bokeh.models import ColumnDataSource, HoverTool
-from matplotlib import pyplot as plt
-from matplotlib.widgets import Slider, Button
 
-from bokeh.plotting import figure
+from sliderplot.sliderplot import _create_matplotlib_plot, BOTTOM_PADDING, SLIDER_HEIGHT, _get_lines, \
+    _create_bokeh_plot
 
-from sliderplot.sliderplot import _create_matplotlib_plot, BOTTOM_PADDING, SLIDER_HEIGHT, _get_lines, _create_bokeh_plot
+_N_POINTS_PER_SLIDER = 1000
 
-
-def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
+def sliderplot(f: Callable, params_bounds=()):
     """
     Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
     :param f: Function to explore.
     :param params_bounds: Sequence of (val_min, val_max) bounds for each parameter of the function f.
-    :param show: If True, show the plot.
     :return: fig and axs (Axes object if there is one subplot, and list of Axes if there are multiple subplots).
     """
     # Get init parameters
@@ -31,7 +25,6 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
     pn.extension(design="material")
 
     # Create sliders
-    N_POINTS = 1000
     sliders = []
     for i, param in enumerate(params.keys()):
         if i < len(params_bounds):
@@ -39,7 +32,7 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
         else:
             val_min, val_max = 0, 20
         slider = pn.widgets.EditableFloatSlider(value=init_params[i], start=val_min, end=val_max, name=param,
-                                                step=(val_max - val_min) / N_POINTS)
+                                                step=(val_max - val_min) / _N_POINTS_PER_SLIDER)
         sliders.append(slider)
 
     fig, lines_source, plot_mode = _create_bokeh_plot(outputs)
@@ -61,80 +54,10 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
     sliders[0].value = init_params[0] + 0.0000000001
     sliders[0].value = init_params[0]
 
-    pn.template.MaterialTemplate(
+    server = pn.template.MaterialTemplate(
         title="Sliderplot",
         sidebar=sliders,
         main=plot,
     ).show()
-
-
-def sliderplot(f: Callable, params_bounds=(), show: bool = True):
-    """
-    Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
-    :param f: Function to explore.
-    :param params_bounds: Sequence of (val_min, val_max) bounds for each parameter of the function f.
-    :param show: If True, show the plot.
-    :return: fig and axs (Axes object if there is one subplot, and list of Axes if there are multiple subplots).
-    """
-    # Get init parameters
-    params = signature(f).parameters
-    init_params = [param.default if param.default is not inspect.Parameter.empty else 1 for param in
-                   params.values()]
-    outputs = f(*init_params)
-
-    # Create plot
-    fig, axs, lines, plot_mode = _create_matplotlib_plot(outputs)
-    # Adjust the main plot to make room for the sliders
-    fig.subplots_adjust(bottom=sum(BOTTOM_PADDING) + len(params) * SLIDER_HEIGHT)
-
-    # Create sliders
-    sliders = []
-    for i, param in enumerate(params.keys()):
-        slider_ax = fig.add_axes((0.15, BOTTOM_PADDING[0] + SLIDER_HEIGHT * (len(params) - 1 - i), 0.6, 0.03))
-        if i < len(params_bounds):
-            val_min, val_max = params_bounds[i]
-        else:
-            val_min, val_max = 0, 20
-        slider = Slider(
-            ax=slider_ax,
-            label=param,
-            valmin=val_min,
-            valmax=val_max,
-            valinit=init_params[i],
-        )
-        sliders.append(slider)
-
-    # The function to be called anytime a slider's value changes
-    def update(event=None):
-        try:
-            new_outputs = f(*(slider.val for slider in sliders))
-        except ZeroDivisionError:
-            return
-
-        for line, (x, y) in zip(lines, _get_lines(new_outputs, plot_mode)):
-            line.set_data(x, y)
-        fig.canvas.draw_idle()
-        if hasattr(axs, "__len__"):
-            [ax.relim() for ax in axs]
-            [ax.autoscale_view(True, True, True) for ax in axs]
-        else:
-            axs.relim()
-            axs.autoscale_view(True, True, True)
-
-    # Register the update function with each slider
-    [slider.on_changed(update) for slider in sliders]
-
-    # Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
-    reset_ax = fig.add_axes((0.85, BOTTOM_PADDING[0] + (len(params) - 1) * SLIDER_HEIGHT, 0.1, 0.04))
-    button = Button(reset_ax, 'Reset', hovercolor='0.975')
-
-    def reset(event=None):
-        [slider.reset() for slider in sliders]
-
-    button.on_clicked(reset)
-
-    fig._sliderplot_button = button  # Prevent garbage collector from deleting button behavior
-
-    if show:
-        plt.show()
-    return fig, axs
+    # Stop server on close
+    server.stop()
