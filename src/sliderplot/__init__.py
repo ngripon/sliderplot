@@ -1,9 +1,11 @@
 import inspect
+from collections.abc import Sequence
 from inspect import signature
 from typing import Callable
 
 import panel as pn
 from bokeh.models import BasicTickFormatter
+from plotly.graph_objs.indicator import Number
 
 from sliderplot.sliderplot import _BOTTOM_PADDING, _SLIDER_HEIGHT, _get_lines, \
     _create_bokeh_plot
@@ -11,7 +13,8 @@ from sliderplot.sliderplot import _BOTTOM_PADDING, _SLIDER_HEIGHT, _get_lines, \
 _N_POINTS_PER_SLIDER = 1000
 
 
-def sliderplot(f: Callable, params_bounds=()):
+def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (), titles: Sequence[str] = (),
+               axes_labels: Sequence[tuple[str, str]] = ()):
     """
     Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
     :param f: Function to explore.
