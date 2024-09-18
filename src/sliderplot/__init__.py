@@ -31,17 +31,19 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
     pn.extension(design="material")
 
     # Create sliders
+    N_POINTS = 1000
     sliders = []
     for i, param in enumerate(params.keys()):
         if i < len(params_bounds):
             val_min, val_max = params_bounds[i]
         else:
             val_min, val_max = 0, 20
-        slider = pn.widgets.EditableFloatSlider(value=init_params[i], start=val_min, end=val_max, name=param)
+        slider = pn.widgets.EditableFloatSlider(value=init_params[i], start=val_min, end=val_max, name=param,
+                                                step=(val_max - val_min) / N_POINTS)
         sliders.append(slider)
 
     source = ColumnDataSource(data=dict(x=[0], y=[0]))
-    curv = figure(tools="pan,reset,save,wheel_zoom", sizing_mode="stretch_both")
+    curv = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
     curv.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
     TOOLTIPS = [
         ("x", "$x"),
