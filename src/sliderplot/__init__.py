@@ -5,7 +5,7 @@ from typing import Callable
 import matplotlib
 import numpy as np
 import panel as pn
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, HoverTool
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider, Button
 
@@ -41,9 +41,13 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
         sliders.append(slider)
 
     source = ColumnDataSource(data=dict(x=[0], y=[0]))
-    curv = figure(title="my sine wave",
-                  tools="crosshair,pan,reset,save,wheel_zoom", sizing_mode="stretch_both")
+    curv = figure(tools="pan,reset,save,wheel_zoom", sizing_mode="stretch_both")
     curv.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
+    TOOLTIPS = [
+        ("x", "$x"),
+        ("y", "$y")
+    ]
+    curv.add_tools(HoverTool(mode="vline", tooltips=TOOLTIPS))
 
     def simulate(*args):
         try:
