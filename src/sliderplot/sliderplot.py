@@ -1,11 +1,13 @@
 import enum
 import itertools
+from numbers import Number
 
 import numpy as np
 from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, HoverTool, LegendItem, Legend
 from bokeh.plotting import figure
 from bokeh.palettes import d3
+from jedi.inference.value.iterable import Sequence
 from plotly.io import renderers
 
 _SLIDER_HEIGHT = 0.05
@@ -48,34 +50,19 @@ def _create_bokeh_plot(outputs, titles=(), labels_list=()):
     if plot_mode is _PlotMode.MULTI_PLOT:
         figs = []
         for subplot_idx, subplot_data in enumerate(outputs):
-            sub_fig = None
             # Manage aesthetics
             title = titles[subplot_idx] if subplot_idx < len(titles) else None
             labels = labels_list[subplot_idx] if subplot_idx < len(labels_list) else ()
-            colors = itertools.cycle(d3["Category20"][19])
             # Create lines
-            for x, y in subplot_data:
-                sub_fig, line_source, legend_item = _create_bokeh_figure(x, y, colors, fig=sub_fig, title=title,
-                                                                         labels=labels)
-                lines_source.append(line_source)
+            sub_fig, sub_line_sources = _create_bokeh_multiline_figure(subplot_data, title, labels)
+            lines_source.extend(sub_line_sources)
             figs.append(sub_fig)
         fig = column(*figs)
     else:
         title = titles[0] if len(titles) else None
         labels = labels_list[0] if len(labels_list) else ()
         if plot_mode is _PlotMode.MULTI_LINE:
-            fig = None
-            colors = itertools.cycle(d3["Category20"][19])
-            legend_items = []
-            for line_data in outputs:
-                x, y = line_data[:2]
-                legend = line_data[2] if len(line_data) > 2 else None
-                fig, line_source, legend_item = _create_bokeh_figure(x, y, fig=fig, colors=colors, title=title,
-                                                                     labels=labels, legend=legend)
-                lines_source.append(line_source)
-                if legend_item is not None:
-                    legend_items.append(legend_item)
-            fig.add_layout(Legend(items=legend_items, click_policy="mute"))
+            fig, lines_source = _create_bokeh_multiline_figure(outputs, title=title, labels=labels)
         elif plot_mode is _PlotMode.LINE_XY:
             fig, line_source, legend_item = _create_bokeh_figure(outputs[0], outputs[1], title=title, labels=labels)
             lines_source.append(line_source)
@@ -88,13 +75,32 @@ def _create_bokeh_plot(outputs, titles=(), labels_list=()):
     return fig, lines_source, plot_mode
 
 
+def _create_bokeh_multiline_figure(data: Sequence(tuple[Number, Number, str]), title: str, labels: tuple[str, str]):
+    fig = None
+    lines_sources = []
+    legend_items = []
+    colors = itertools.cycle(d3["Category20"][19])
+    # Create lines
+    for line_data in data:
+        x, y = line_data[:2]
+        legend = line_data[2] if len(line_data) > 2 else None
+        fig, line_source, legend_item = _create_bokeh_figure(x, y, colors, fig=fig, title=title,
+                                                             labels=labels, legend=legend)
+        lines_sources.append(line_source)
+        if legend_item is not None:
+            legend_items.append(legend_item)
+    fig.add_layout(Legend(items=legend_items, click_policy="mute"))
+    return fig, lines_sources
+
+
 TOOLTIPS = [
     ("x", "@x"),
     ("y", "@y")
 ]
 
 
-def _create_bokeh_figure(x, y, colors, fig=None, title: str = None, labels: tuple[str, str] = (), legend: str = None):
+def _create_bokeh_figure(x, y, colors=None, fig=None, title: str = None, labels: tuple[str, str] = (),
+                         legend: str = None):
     line_source = ColumnDataSource(data=dict(x=x, y=y))
     if fig is None:
         fig = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
@@ -110,11 +116,11 @@ def _create_bokeh_figure(x, y, colors, fig=None, title: str = None, labels: tupl
                 fig.yaxis[0].axis_label = axis_label
             else:
                 break
-    r = fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
-    _ = next(colors)  # Trick to use last the uneven colors of the palette
-    legend_item = None
-    if legend:
-        legend_item = LegendItem(label=legend, renderers=[r])
+    r = fig.line('x', 'y', source=line_source, line_width=3)
+    if colors:
+        r.glyph.line_color = next(colors)
+        _ = next(colors)  # Trick to use last the uneven colors of the palette
+    legend_item = LegendItem(label=legend, renderers=[r]) if legend is not None else None
     return fig, line_source, legend_item
 
 
