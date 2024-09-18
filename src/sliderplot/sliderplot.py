@@ -74,8 +74,8 @@ def _create_bokeh_plot(outputs):
 
 
 TOOLTIPS = [
-    ("x", "$x"),
-    ("y", "$y")
+    ("x", "@x"),
+    ("y", "@y")
 ]
 
 
