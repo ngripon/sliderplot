@@ -83,7 +83,7 @@ def _create_bokeh_figure(x, y, colors=None, fig=None):
     line_source = ColumnDataSource(data=dict(x=x, y=y))
     if fig is None:
         fig = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
-        fig.add_tools(HoverTool(mode="vline", tooltips=TOOLTIPS))
+        fig.add_tools(HoverTool(tooltips=TOOLTIPS))
     if colors is not None:
         fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
         _ = next(colors)  # Trick to use last the uneven colors of the palette
