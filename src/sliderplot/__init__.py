@@ -3,11 +3,16 @@ from inspect import signature
 from typing import Callable
 
 import matplotlib
+import numpy as np
 import panel as pn
+from bokeh.models import ColumnDataSource
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider, Button
 
+from bokeh.plotting import figure
+
 from sliderplot.sliderplot import _create_plot, BOTTOM_PADDING, SLIDER_HEIGHT, _get_lines
+
 
 def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
     """
@@ -35,25 +40,31 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
         slider = pn.widgets.EditableFloatSlider(value=init_params[i], start=val_min, end=val_max, name=param)
         sliders.append(slider)
 
-
     def simulate(*args):
         try:
             outputs = f(*args)
         except ZeroDivisionError:
             return
-        fig, axs, lines, plot_mode = _create_plot(outputs)
-        return fig
+        source = ColumnDataSource(data=dict(x=outputs[0], y=outputs[1]))
+        curv = figure(height=400, width=400, title="my sine wave",
+                       tools="crosshair,pan,reset,save,wheel_zoom",
+                       x_range=[0, 4 * np.pi], y_range=[-2.5, 2.5])
+        curv.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
+        # fig, axs, lines, plot_mode = _create_plot(outputs)
+        return curv
 
-    fig= pn.bind(simulate,*sliders)
+    curve = pn.bind(simulate, *sliders)
 
-    plot = pn.panel(fig, format="svg", tight=True, sizing_mode="stretch_both")
+    plot = pn.pane.Bokeh(curve)
 
+    # plot = pn.panel(fig, format="svg", tight=True, sizing_mode="stretch_both")
 
     pn.template.MaterialTemplate(
         title="Sliderplot",
         sidebar=sliders,
         main=plot,
     ).show()
+
 
 def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     """
