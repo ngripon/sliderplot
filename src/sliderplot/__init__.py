@@ -11,7 +11,7 @@ from matplotlib.widgets import Slider, Button
 
 from bokeh.plotting import figure
 
-from sliderplot.sliderplot import _create_plot, BOTTOM_PADDING, SLIDER_HEIGHT, _get_lines
+from sliderplot.sliderplot import _create_matplotlib_plot, BOTTOM_PADDING, SLIDER_HEIGHT, _get_lines, _create_bokeh_plot
 
 
 def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
@@ -26,8 +26,8 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
     params = signature(f).parameters
     init_params = [param.default if param.default is not inspect.Parameter.empty else 1 for param in
                    params.values()]
+    outputs = f(*init_params)
 
-    matplotlib.use("agg")
     pn.extension(design="material")
 
     # Create sliders
@@ -42,24 +42,20 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
                                                 step=(val_max - val_min) / N_POINTS)
         sliders.append(slider)
 
-    source = ColumnDataSource(data=dict(x=[0], y=[0]))
-    curv = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
-    curv.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
-    TOOLTIPS = [
-        ("x", "$x"),
-        ("y", "$y")
-    ]
-    curv.add_tools(HoverTool(mode="vline", tooltips=TOOLTIPS))
+    fig, lines_source, plot_mode = _create_bokeh_plot(outputs)
 
     def simulate(*args):
         try:
-            outputs = f(*args)
+            new_outputs = f(*args)
         except ZeroDivisionError:
             return
-        source.data = dict(x=outputs[0], y=outputs[1])
-        return curv
+        for line, (x, y) in zip(lines_source, _get_lines(new_outputs, plot_mode)):
+            line.data = dict(x=x, y=y)
+        return fig
 
     curve = pn.bind(simulate, *sliders)
+
+
 
     plot = pn.pane.Bokeh(curve, sizing_mode="stretch_both")
 
@@ -85,7 +81,7 @@ def sliderplot(f: Callable, params_bounds=(), show: bool = True):
     outputs = f(*init_params)
 
     # Create plot
-    fig, axs, lines, plot_mode = _create_plot(outputs)
+    fig, axs, lines, plot_mode = _create_matplotlib_plot(outputs)
     # Adjust the main plot to make room for the sliders
     fig.subplots_adjust(bottom=sum(BOTTOM_PADDING) + len(params) * SLIDER_HEIGHT)
 

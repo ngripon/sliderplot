@@ -2,6 +2,9 @@ import enum
 
 import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.layouts import column, row
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.plotting import figure
 
 SLIDER_HEIGHT = 0.05
 BOTTOM_PADDING = (0.03, 0.1)
@@ -37,7 +40,7 @@ def _compute_depth(data) -> int:
     return depth
 
 
-def _create_plot(outputs):
+def _create_matplotlib_plot(outputs):
     lines = []
     plot_mode = _get_plot_mode(outputs)
     n_plots = len(outputs) if plot_mode is _PlotMode.MULTI_PLOT else 1
@@ -62,6 +65,51 @@ def _create_plot(outputs):
             line, = axs.plot(x, outputs, lw=2)
             lines.append(line)
     return fig, axs, lines, plot_mode
+
+
+def _create_bokeh_plot(outputs):
+    lines_source = []
+    plot_mode = _get_plot_mode(outputs)
+    if plot_mode is _PlotMode.MULTI_PLOT:
+        figs = []
+        for subplot_data in outputs:
+            sub_fig = None
+            for x, y in subplot_data:
+                sub_fig, line_source = _create_bokeh_figure(x, y, sub_fig)
+                lines_source.append(line_source)
+            figs.append(sub_fig)
+        fig = row(*figs)
+    else:
+        if plot_mode is _PlotMode.MULTI_LINE:
+            fig = None
+            for x, y in outputs:
+                fig, line_source = _create_bokeh_figure(x, y, fig)
+                lines_source.append(line_source)
+        elif plot_mode is _PlotMode.LINE_XY:
+            fig, line_source = _create_bokeh_figure(outputs[0], outputs[1])
+            lines_source.append(line_source)
+        elif plot_mode is _PlotMode.LINE_X:
+            x = np.arange(len(outputs))
+            fig, line_source = _create_bokeh_figure(x, outputs)
+            lines_source.append(line_source)
+        else:
+            raise Exception(f"This mode is not supported: {plot_mode}")
+    return fig, lines_source, plot_mode
+
+
+TOOLTIPS = [
+    ("x", "$x"),
+    ("y", "$y")
+]
+
+
+def _create_bokeh_figure(x, y, fig=None):
+    line_source = ColumnDataSource(data=dict(x=x, y=y))
+    if fig is None:
+        fig = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
+        fig.add_tools(HoverTool(mode="vline", tooltips=TOOLTIPS))
+    fig.line('x', 'y', source=line_source, line_width=3, line_alpha=0.6)
+    return fig, line_source
 
 
 def _get_lines(outputs, plot_mode: _PlotMode):
