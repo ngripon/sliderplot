@@ -19,6 +19,8 @@ def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (),
     Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
     :param f: Function to explore.
     :param params_bounds: Sequence of (val_min, val_max) bounds for each parameter of the function f.
+    :param titles:
+    :param axes_labels:
     :return: fig and axs (Axes object if there is one subplot, and list of Axes if there are multiple subplots).
     """
     # Get init parameters
@@ -41,7 +43,7 @@ def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (),
                                                 format=BasicTickFormatter(precision=4))
         sliders.append(slider)
 
-    fig, lines_source, plot_mode = _create_bokeh_plot(outputs)
+    fig, lines_source, plot_mode = _create_bokeh_plot(outputs, titles, axes_labels)
 
     def simulate(*args):
         try:

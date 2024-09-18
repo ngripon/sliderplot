@@ -41,32 +41,34 @@ def _compute_depth(data) -> int:
     return depth
 
 
-def _create_bokeh_plot(outputs):
+def _create_bokeh_plot(outputs, titles=(), labels=()):
     lines_source = []
     plot_mode = _get_plot_mode(outputs)
     if plot_mode is _PlotMode.MULTI_PLOT:
         figs = []
-        for subplot_data in outputs:
+        for subplot_idx, subplot_data in enumerate(outputs):
             sub_fig = None
+            title = titles[subplot_idx] if subplot_idx < len(titles) else None
             colors = itertools.cycle(d3["Category20"][19])
             for x, y in subplot_data:
-                sub_fig, line_source = _create_bokeh_figure(x, y, colors, fig=sub_fig)
+                sub_fig, line_source = _create_bokeh_figure(x, y, colors, fig=sub_fig, title=title)
                 lines_source.append(line_source)
             figs.append(sub_fig)
         fig = column(*figs)
     else:
+        title = titles[0] if len(titles) else None
         if plot_mode is _PlotMode.MULTI_LINE:
             fig = None
             colors = itertools.cycle(d3["Category20"][19])
             for x, y in outputs:
-                fig, line_source = _create_bokeh_figure(x, y, fig=fig, colors=colors)
+                fig, line_source = _create_bokeh_figure(x, y, fig=fig, colors=colors, title=title)
                 lines_source.append(line_source)
         elif plot_mode is _PlotMode.LINE_XY:
-            fig, line_source = _create_bokeh_figure(outputs[0], outputs[1])
+            fig, line_source = _create_bokeh_figure(outputs[0], outputs[1], title=title)
             lines_source.append(line_source)
         elif plot_mode is _PlotMode.LINE_X:
             x = np.arange(len(outputs))
-            fig, line_source = _create_bokeh_figure(x, outputs)
+            fig, line_source = _create_bokeh_figure(x, outputs, title=title)
             lines_source.append(line_source)
         else:
             raise Exception(f"This mode is not supported: {plot_mode}")
@@ -79,11 +81,14 @@ TOOLTIPS = [
 ]
 
 
-def _create_bokeh_figure(x, y, colors=None, fig=None):
+def _create_bokeh_figure(x, y, colors=None, fig=None, title=None, labels: tuple[str, str] = None):
     line_source = ColumnDataSource(data=dict(x=x, y=y))
     if fig is None:
         fig = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
         fig.add_tools(HoverTool(tooltips=TOOLTIPS))
+        if title is not None:
+            fig.title.text = title
+            print("hey")
     if colors is not None:
         fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
         _ = next(colors)  # Trick to use last the uneven colors of the palette
