@@ -4,7 +4,7 @@ from typing import Callable
 
 import panel as pn
 
-from sliderplot.sliderplot import _create_matplotlib_plot, BOTTOM_PADDING, SLIDER_HEIGHT, _get_lines, \
+from sliderplot.sliderplot import _BOTTOM_PADDING, _SLIDER_HEIGHT, _get_lines, \
     _create_bokeh_plot
 
 _N_POINTS_PER_SLIDER = 1000

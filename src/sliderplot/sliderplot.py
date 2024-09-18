@@ -7,8 +7,8 @@ from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.palettes import d3
 
-SLIDER_HEIGHT = 0.05
-BOTTOM_PADDING = (0.03, 0.1)
+_SLIDER_HEIGHT = 0.05
+_BOTTOM_PADDING = (0.03, 0.1)
 
 
 class _PlotMode(enum.Enum):
@@ -44,7 +44,6 @@ def _compute_depth(data) -> int:
 def _create_bokeh_plot(outputs):
     lines_source = []
     plot_mode = _get_plot_mode(outputs)
-    print(d3["Category20"])
     if plot_mode is _PlotMode.MULTI_PLOT:
         figs = []
         for subplot_data in outputs:
@@ -58,8 +57,9 @@ def _create_bokeh_plot(outputs):
     else:
         if plot_mode is _PlotMode.MULTI_LINE:
             fig = None
+            colors = itertools.cycle(d3["Category20"][19])
             for x, y in outputs:
-                fig, line_source = _create_bokeh_figure(x, y, fig)
+                fig, line_source = _create_bokeh_figure(x, y, fig=fig, colors=colors)
                 lines_source.append(line_source)
         elif plot_mode is _PlotMode.LINE_XY:
             fig, line_source = _create_bokeh_figure(outputs[0], outputs[1])
