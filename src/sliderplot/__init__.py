@@ -53,11 +53,13 @@ def sliderplot_panel(f: Callable, params_bounds=(), show: bool = True):
             line.data = dict(x=x, y=y)
         return fig
 
-    curve = pn.bind(simulate, *sliders)
+    curves = pn.bind(simulate, *sliders)
 
+    plot = pn.pane.Bokeh(curves, sizing_mode="stretch_both")
 
-
-    plot = pn.pane.Bokeh(curve, sizing_mode="stretch_both")
+    # Dirty trick to fix bug that make the plot empty when init with multiple plots
+    sliders[0].value = init_params[0] + 0.0000000001
+    sliders[0].value = init_params[0]
 
     pn.template.MaterialTemplate(
         title="Sliderplot",
