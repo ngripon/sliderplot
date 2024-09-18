@@ -1,10 +1,12 @@
 import enum
+import itertools
 
 import matplotlib.pyplot as plt
 import numpy as np
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
+from bokeh.palettes import d3
 
 SLIDER_HEIGHT = 0.05
 BOTTOM_PADDING = (0.03, 0.1)
@@ -70,12 +72,14 @@ def _create_matplotlib_plot(outputs):
 def _create_bokeh_plot(outputs):
     lines_source = []
     plot_mode = _get_plot_mode(outputs)
+    print(d3["Category20"])
     if plot_mode is _PlotMode.MULTI_PLOT:
         figs = []
         for subplot_data in outputs:
             sub_fig = None
+            colors = itertools.cycle(d3["Category20"][19])
             for x, y in subplot_data:
-                sub_fig, line_source = _create_bokeh_figure(x, y, sub_fig)
+                sub_fig, line_source = _create_bokeh_figure(x, y,colors, fig=sub_fig)
                 lines_source.append(line_source)
             figs.append(sub_fig)
         fig = row(*figs)
@@ -103,12 +107,16 @@ TOOLTIPS = [
 ]
 
 
-def _create_bokeh_figure(x, y, fig=None):
+def _create_bokeh_figure(x, y, colors=None, fig=None):
     line_source = ColumnDataSource(data=dict(x=x, y=y))
     if fig is None:
         fig = figure(tools="pan,reset,save, box_zoom,wheel_zoom", sizing_mode="stretch_both")
         fig.add_tools(HoverTool(mode="vline", tooltips=TOOLTIPS))
-    fig.line('x', 'y', source=line_source, line_width=3, line_alpha=0.6)
+    if colors is not None:
+        fig.line('x', 'y', source=line_source, line_width=3, color=next(colors))
+        _ =next(colors)
+    else:
+        fig.line('x', 'y', source=line_source, line_width=3)
     return fig, line_source
 
 

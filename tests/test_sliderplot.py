@@ -29,3 +29,15 @@ def test_multiple_plots():
         return ((x, y),), ((x, 2 * y), (x, x + y))
 
     sliderplot_panel(f)
+
+
+def test_lot_of_lines():
+    def f(amplitude=2, frequency=2, phase=2):
+        x = np.linspace(0, 10, 1000)
+        y = amplitude * np.sin(frequency * x + phase)
+        multi_lines = []
+        for i in range(20):
+            multi_lines.append((x, i * y))
+        return ((x, y),), multi_lines
+
+    sliderplot_panel(f)
