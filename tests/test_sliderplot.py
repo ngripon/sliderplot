@@ -47,3 +47,14 @@ def test_lot_of_lines():
         return ((x, y),), multi_lines
 
     sliderplot(f)
+
+
+def test_lot_of_parameters():
+    def f(a, b, c, d, e, f, g, h, i, j, k, l, m, o, p, q, r, s, t, u, v, w, x, y, z):
+        x = np.linspace(0, 10, 1000)
+        y = a * np.sin(b * x + c)
+        return x, y
+
+    sliderplot(
+        f
+    )
