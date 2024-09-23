@@ -1,5 +1,6 @@
 import enum
 import itertools
+from collections.abc import Sequence
 from numbers import Number
 
 import numpy as np
@@ -7,8 +8,6 @@ from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, HoverTool, LegendItem, Legend
 from bokeh.plotting import figure
 from bokeh.palettes import d3
-from jedi.inference.value.iterable import Sequence
-from plotly.io import renderers
 
 _SLIDER_HEIGHT = 0.05
 _BOTTOM_PADDING = (0.03, 0.1)
@@ -78,7 +77,7 @@ def _create_bokeh_plot(outputs, titles=(), labels_list=()):
     return fig, lines_source, plot_mode
 
 
-def _create_bokeh_multiline_figure(data: Sequence(tuple[Number, Number, str]), title: str, labels: tuple[str, str]):
+def _create_bokeh_multiline_figure(data: Sequence[tuple[Number, Number, str]], title: str, labels: tuple[str, str]):
     fig = None
     lines_sources = []
     legend_items = []
