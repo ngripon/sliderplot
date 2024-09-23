@@ -67,10 +67,13 @@ def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (),
     template = pn.template.MaterialTemplate(
         title=page_title,
         sidebar=sliders,
-        main=plot,
-        logo=page_logo,
-        favicon=page_logo
+        main=plot
     )
+    if page_logo:
+        template.param.update(
+            logo=page_logo,
+            favicon=page_logo
+        )
     server=template.show()
     # Stop server on close
     server.stop()

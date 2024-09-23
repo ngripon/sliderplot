@@ -66,7 +66,8 @@ def _create_bokeh_plot(outputs, titles=(), labels_list=()):
             legend = outputs[2] if len(outputs) > 2 else None
             fig, line_source, legend_item = _create_bokeh_figure(outputs[0], outputs[1], title=title, labels=labels,
                                                                  legend=legend)
-            fig.add_layout(Legend(items=[legend_item], click_policy="mute"))
+            if legend_item is not None:
+                fig.add_layout(Legend(items=[legend_item], click_policy="mute"))
             lines_source.append(line_source)
         elif plot_mode is _PlotMode.LINE_X:
             x = np.arange(len(outputs))
