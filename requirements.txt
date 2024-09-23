@@ -1,0 +1,4 @@
+panel==1.5.0
+numpy==2.1.1
+bokeh==3.5.2
+pytest==8.3.3
