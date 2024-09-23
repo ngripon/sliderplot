@@ -10,7 +10,7 @@ def test_minimal_example():
         y = amplitude * np.sin(frequency * x + phase)
         return x, y, "Hey"
 
-    sliderplot(f, params_bounds=((0, 1),), titles=("Minimal example",))
+    sliderplot(f, params_bounds=((0, 1),), titles=("Minimal example",), page_title="Minimal example")
 
 
 def test_multiple_lines():

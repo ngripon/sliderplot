@@ -14,7 +14,7 @@ _N_POINTS_PER_SLIDER = 1000
 
 
 def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (), titles: Sequence[str] = (),
-               axes_labels: Sequence[tuple[str, str]] = ()):
+               axes_labels: Sequence[tuple[str, str]] = (), page_title: str = "Sliderplot", page_icon: str = None):
     """
     Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
     :param f: Function to explore.
@@ -62,10 +62,8 @@ def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (),
     sliders[0].value = init_params[0] + 0.0000000001
     sliders[0].value = init_params[0]
 
-
-
     server = pn.template.MaterialTemplate(
-        title="Sliderplot",
+        title=page_title,
         sidebar=sliders,
         main=plot,
     ).show()
