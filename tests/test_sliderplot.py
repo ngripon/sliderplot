@@ -58,3 +58,11 @@ def test_lot_of_parameters():
     sliderplot(
         f
     )
+
+def test_only_x():
+    def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+        x = np.linspace(0, 10, 1000)
+        y = amplitude * np.sin(frequency * x + phase)
+        return y
+
+    sliderplot(f)
