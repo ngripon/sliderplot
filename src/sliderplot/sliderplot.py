@@ -21,7 +21,7 @@ class _PlotMode(enum.Enum):
 
 
 def _get_plot_mode(output_data) -> _PlotMode:
-    plot_mode_map = {1: _PlotMode.LINE_X, 2: _PlotMode.LINE_XY, 3: _PlotMode.MULTI_LINE, 4: _PlotMode.MULTI_PLOT}
+    plot_mode_map = {0: _PlotMode.LINE_X, 1: _PlotMode.LINE_XY, 2: _PlotMode.MULTI_LINE, 3: _PlotMode.MULTI_PLOT}
     depth = _compute_depth(output_data)
     if depth in plot_mode_map.keys():
         return plot_mode_map[depth]
@@ -31,21 +31,29 @@ def _get_plot_mode(output_data) -> _PlotMode:
 
 
 def _compute_depth(data) -> int:
-    # TODO: check depth of all elements
-    depth = 0
-    current_element = data
-    while True:
-        try:
-            current_element = current_element[0]
-            depth += 1
-        except IndexError:
-            break
-    return depth
+    if not hasattr(data[0], "__len__"):
+        return 0
+    to_visit = [(data, 0)]
+    depth_list = []
+    while len(to_visit):
+        current_el, current_depth = to_visit.pop()
+        for child_el in current_el:
+            if hasattr(child_el[0], "__len__") and not isinstance(child_el[0], str):
+                to_visit.append((child_el, current_depth + 1))
+            else:
+                depth_list.append(current_depth + 1)
+    if not all(depth == depth_list[0] for depth in depth_list):
+        raise ValueError(
+            "Wrong output format for the given function.\n"
+            f"All elements must have the same depth, but elements have the following depths: {depth_list}.\n"
+            "Please check the documentation for correct format examples.")
+    return depth_list[0]
 
 
 def _create_bokeh_plot(outputs, titles=(), labels_list=()):
     lines_source = []
     plot_mode = _get_plot_mode(outputs)
+    print(plot_mode)
     if plot_mode is _PlotMode.MULTI_PLOT:
         figs = []
         for subplot_idx, subplot_data in enumerate(outputs):
