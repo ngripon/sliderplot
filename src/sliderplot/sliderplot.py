@@ -31,16 +31,23 @@ def _get_plot_mode(output_data) -> _PlotMode:
 
 
 def _compute_depth(data) -> int:
-    # TODO: check depth of all elements
-    depth = 0
-    current_element = data
-    while True:
-        try:
-            current_element = current_element[0]
-            depth += 1
-        except IndexError:
-            break
-    return depth
+    if not hasattr(data[0], "__len__"):
+        return 0
+    to_visit = [(data, 0)]
+    depth_list = []
+    while len(to_visit):
+        current_el, current_depth = to_visit.pop()
+        for child_el in current_el:
+            if hasattr(child_el[0], "__len__") and not isinstance(child_el[0], str):
+                to_visit.append((child_el, current_depth + 1))
+            else:
+                depth_list.append(current_depth + 1)
+    if not all(depth == depth_list[0] for depth in depth_list):
+        raise ValueError(
+            "Wrong output format for the given function.\n"
+            f"All elements must have the same depth, but elements have the following depths: {depth_list}.\n"
+            "Please check the documentation for correct format examples.")
+    return depth_list[0]+1
 
 
 def _create_bokeh_plot(outputs, titles=(), labels_list=()):
