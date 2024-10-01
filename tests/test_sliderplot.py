@@ -15,7 +15,8 @@ def test_minimal_example():
         params_bounds=((0, 1),),
         titles=("Minimal example",),
         page_title="Minimal example",
-        page_logo="files/favicon.png"
+        page_logo="files/favicon.png",
+        show=False
     )
 
 
