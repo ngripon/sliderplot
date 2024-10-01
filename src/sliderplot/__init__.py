@@ -7,7 +7,8 @@ from typing import Callable
 
 import panel as pn
 from bokeh.models import BasicTickFormatter
-from panel import serve
+
+pn.extension(design="material")
 
 from sliderplot.sliderplot import _BOTTOM_PADDING, _SLIDER_HEIGHT, _get_lines, \
     _create_bokeh_plot
@@ -31,7 +32,7 @@ def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (),
                    params.values()]
     outputs = f(*init_params)
 
-    pn.extension(design="material")
+    
 
     # Create sliders
     sliders = []
@@ -75,5 +76,4 @@ def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (),
             favicon=page_logo
         )
     server=template.show()
-    # Stop server on close
-    server.stop()
+    return template
