@@ -43,10 +43,6 @@ vectors.
 ### Example
 
 ``` python
-from sliderplot import sliderplot
-import numpy as np
-
-
 def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
@@ -64,10 +60,6 @@ same-length `x` and `y` vectors.
 ### Example
 
 ``` python
-from sliderplot import sliderplot
-import numpy as np
-
-
 def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
@@ -89,10 +81,6 @@ following levels, top to bottom:
 ### Example
 
 ``` python
-from sliderplot import sliderplot
-import numpy as np
-
-
 def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
@@ -111,10 +99,6 @@ To add a label to a line that will be displayed in the plot legend, return the l
 ### Example
 
 ``` python
-from sliderplot import sliderplot
-import numpy as np
-
-
 def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
@@ -137,10 +121,6 @@ In the following example, the initial slider values are:
 - `phase = np.pi / 2`
 
 ``` python
-from sliderplot import sliderplot
-import numpy as np
-
-
 def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
@@ -166,10 +146,6 @@ In the following example, the slider bounds are:
 - `phase = (0, np.pi)`
 
 ``` python
-from sliderplot import sliderplot
-import numpy as np
-
-
 def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
@@ -179,10 +155,14 @@ def f(amplitude, frequency, phase):
 sliderplot(f, params_bounds=((0, 1), (1, 1000), (0, np.pi)))
 ```
 
-## Plot edition
+## Axes labels
 
-### Axis labels
 
-### Plot title
+
+## Plot title
+
+## Web page title
+
+## Web page logo
 
 TODO
