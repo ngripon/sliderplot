@@ -47,7 +47,7 @@ from sliderplot import sliderplot
 import numpy as np
 
 
-def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
     return x, y
@@ -68,7 +68,7 @@ from sliderplot import sliderplot
 import numpy as np
 
 
-def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
     return (x, y), (x, 2 * y), (x, 3 * y)
@@ -93,7 +93,7 @@ from sliderplot import sliderplot
 import numpy as np
 
 
-def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
     return ((x, y), (x, 2 * y)), ((x, 3 * y),)
@@ -102,9 +102,30 @@ def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
 sliderplot(f)
 ```
 
-## Default slider position
+## Initial slider position
 
-TODO
+To set the slider initial value for a parameter, simply add a default argument to the function.
+
+### Example
+
+In the following example, the initial slider values are:
+- `amplitude = 1`
+- `frequency = np.pi`
+- `phase = np.pi / 2`
+
+``` python
+from sliderplot import sliderplot
+import numpy as np
+
+
+def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return x, y
+
+
+sliderplot(f)
+```
 
 ## Slider bounds settings
 
