@@ -104,11 +104,12 @@ sliderplot(f)
 
 ## Line labels
 
-To add a label to a line that will be displayed in the plot legend, return the line data with the following format: 
+To add a label to a line that will be displayed in the plot legend, return the line data with the following format:
 
 `(x, y, label: str)`
 
 ### Example
+
 ``` python
 from sliderplot import sliderplot
 import numpy as np
@@ -130,6 +131,7 @@ To set the slider initial value for a parameter, simply add a default argument t
 ### Example
 
 In the following example, the initial slider values are:
+
 - `amplitude = 1`
 - `frequency = np.pi`
 - `phase = np.pi / 2`
@@ -150,7 +152,32 @@ sliderplot(f)
 
 ## Slider bounds settings
 
-TODO
+Use the `param_bounds` arguments of the `sliderplot()` function to specify the slider bounds of each parameter. It takes
+a list of pairs of `(min_value, max_value)`. 
+
+The first pair contains the bounds of the first argument, the second pair
+contains the bounds of the second argument, etc...
+
+### Example
+
+In the following example, the slider bounds are:
+- `amplitude = (0, 1)`
+- `frequency = (1, 1000)`
+- `phase = (0, np.pi)`
+
+``` python
+from sliderplot import sliderplot
+import numpy as np
+
+
+def f(amplitude, frequency, phase):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return x, y
+
+
+sliderplot(f, params_bounds=((0, 1), (1, 1000), (0, np.pi)))
+```
 
 ## Plot edition
 
