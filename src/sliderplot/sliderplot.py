@@ -53,7 +53,6 @@ def _compute_depth(data) -> int:
 def _create_bokeh_plot(outputs, titles=(), labels_list=()):
     lines_source = []
     plot_mode = _get_plot_mode(outputs)
-    print(plot_mode)
     if plot_mode is _PlotMode.MULTI_PLOT:
         figs = []
         for subplot_idx, subplot_data in enumerate(outputs):
