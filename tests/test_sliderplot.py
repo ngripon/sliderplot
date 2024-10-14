@@ -15,7 +15,8 @@ def test_minimal_example():
         params_bounds=((0, 1),),
         titles=("Minimal example",),
         page_title="Minimal example",
-        page_logo="files/favicon.png"
+        page_logo="files/favicon.png",
+        show=False
     )
 
 
@@ -25,7 +26,7 @@ def test_multiple_lines():
         y = amplitude * np.sin(frequency * x + phase)
         return (x, y), (2 * x, 2 * y, "Yo")
 
-    sliderplot(f, titles=("Multiple lines",), axes_labels=(('Time', "Something"),))
+    sliderplot(f, titles=("Multiple lines",), axes_labels=(('Time', "Something"),), show=False)
 
 
 def test_multiple_plots():
@@ -34,7 +35,7 @@ def test_multiple_plots():
         y = amplitude * np.sin(frequency * x + phase)
         return ((x, y, "Hey"),), ((x, 2 * y), (x, x + y, "Hop la"))
 
-    sliderplot(f, titles=("Test 1", "Test 2"), axes_labels=(('Time', "Something"), ('Weight', "Anything"),))
+    sliderplot(f, titles=("Test 1", "Test 2"), axes_labels=(('Time', "Something"), ('Weight', "Anything"),), show=False)
 
 
 def test_lot_of_lines():
@@ -46,7 +47,7 @@ def test_lot_of_lines():
             multi_lines.append((x, i * y))
         return ((x, y),), multi_lines
 
-    sliderplot(f)
+    sliderplot(f, show=False)
 
 
 def test_lot_of_parameters():
@@ -56,7 +57,8 @@ def test_lot_of_parameters():
         return x, y
 
     sliderplot(
-        f
+        f,
+        show=False
     )
 
 def test_only_x():
@@ -65,4 +67,4 @@ def test_only_x():
         y = amplitude * np.sin(frequency * x + phase)
         return y
 
-    sliderplot(f)
+    sliderplot(f, show=False)

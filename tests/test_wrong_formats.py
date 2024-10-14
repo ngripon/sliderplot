@@ -1,5 +1,3 @@
-from multiprocessing.managers import Value
-
 import numpy as np
 import pytest
 
@@ -11,8 +9,9 @@ def test_wrong_depth_1():
         x = np.linspace(0, 10, 1000)
         y = amplitude * np.sin(frequency * x + phase)
         return (x, y, "Hey"), x, 2 * y
+
     with pytest.raises(ValueError):
-        sliderplot(f)
+        sliderplot(f, show=False)
 
 
 def test_wrong_depth_2():
@@ -22,4 +21,4 @@ def test_wrong_depth_2():
         return ((x, y, "Hey"),), (x, 2 * y)
 
     with pytest.raises(ValueError):
-        sliderplot(f)
+        sliderplot(f, show=False)
