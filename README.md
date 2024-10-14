@@ -4,8 +4,8 @@
 
 Turn a function into an interactive plot with a single line of code.
 
-It is like a [DynamicMap](https://holoviews.org/reference/containers/bokeh/DynamicMap.html) but with multiple lines and
-plots capabilities.
+It is very similar to [Holoviews DynamicMap](https://holoviews.org/reference/containers/bokeh/DynamicMap.html) but with multiple lines and
+plots capabilities, and with only sliders as interactive elements.
 
 # Demo
 
@@ -14,13 +14,22 @@ plots capabilities.
 </p>
 
 ``` python
-    def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
-        x = np.linspace(0, 10, 1000)
-        y = amplitude * np.sin(frequency * x + phase)
-        return x, y
+from sliderplot import sliderplot
+import numpy as np
 
 
-    sliderplot(f, params_bounds=((0, 10), (0, 10 * np.pi), (0, 2 * np.pi)), show=True)
+def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return x, y, "Hey"
+
+
+sliderplot(
+    f,
+    params_bounds=((0, 1),),
+    titles=("Minimal example",),
+    page_title="Minimal example",
+)
 ```
 
 # Features
