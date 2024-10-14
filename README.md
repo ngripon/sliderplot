@@ -82,9 +82,9 @@ sliderplot(f)
 To create a sliderplot with multiple subplots, pass into `sliderplot()` a function that returns a list with the
 following levels, top to bottom:
 
-1. List of subplots
-2. List of lines
-3. Line: `(x, y)` pair of same-length vectors
+1. List of subplots.
+2. List of lines.
+3. Line: `(x, y)` pair of same-length vectors, or `(x, y, label: str)` to add a line label.
 
 ### Example
 
@@ -97,6 +97,27 @@ def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
     return ((x, y), (x, 2 * y)), ((x, 3 * y),)
+
+
+sliderplot(f)
+```
+
+## Line labels
+
+To add a label to a line that will be displayed in the plot legend, return the line data with the following format: 
+
+`(x, y, label: str)`
+
+### Example
+``` python
+from sliderplot import sliderplot
+import numpy as np
+
+
+def f(amplitude, frequency, phase):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return (x, y, "First"), (x, 2 * y), (x, 3 * y, "Third")
 
 
 sliderplot(f)
