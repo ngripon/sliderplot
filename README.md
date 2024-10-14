@@ -58,7 +58,25 @@ sliderplot(f)
 
 ## Multiple lines
 
-TODO
+To create a sliderplot with multiple lines, pass into `sliderplot()` a function that returns multiple pairs of
+same-length `x` and `y`
+vectors.
+
+### Example
+
+``` python
+from sliderplot import sliderplot
+import numpy as np
+
+
+def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return (x, y), (x, 2 * y), (x, 3 * y)
+
+
+sliderplot(f)
+```
 
 ## Multiple subplots
 
