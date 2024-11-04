@@ -1,16 +1,11 @@
-
 from sliderplot import sliderplot
 import numpy as np
 
-def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+
+def f(amplitude, frequency, phase):
     x = np.linspace(0, 10, 1000)
     y = amplitude * np.sin(frequency * x + phase)
-    return x, y, "Hey"
+    return ((x, y), (x, 2 * y)), ((x, 3 * y),)
 
 
-sliderplot(
-    f,
-    params_bounds=((0, 1),),
-    titles=("Minimal example",),
-    page_title="Minimal example",
-)
+sliderplot(f, page_title="Page title")
