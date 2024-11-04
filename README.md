@@ -11,7 +11,7 @@ plots capabilities, and with only sliders as interactive elements.
 # Demo
 
 <p align="center">
-    <img src="https://github.com/ngripon/sliderplot/raw/main/demo.gif" width="520" alt="demo" />
+    <img src="https://github.com/ngripon/sliderplot/raw/main/demo.gif" width="800" alt="demo" />
 </p>
 
 ``` python
