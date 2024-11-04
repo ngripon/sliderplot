@@ -2,7 +2,6 @@ import inspect
 from collections.abc import Sequence
 from inspect import signature
 from numbers import Number
-from os import path
 from typing import Callable
 
 import panel as pn
@@ -18,14 +17,18 @@ _N_POINTS_PER_SLIDER = 1000
 
 def sliderplot(f: Callable, params_bounds: Sequence[tuple[Number, Number]] = (), titles: Sequence[str] = (),
                axes_labels: Sequence[tuple[str, str]] = (), page_title: str = "Sliderplot", page_logo: str = None,
-               show:bool=True):
+               show: bool = True):
     """
     Create an interactive plot with sliders to explore the outputs of the function f for different inputs.
+
+    :param show: If True, open a tab in the browser with the plot.
+    :param page_logo: Filepath to an SVG or PNG image that will be used as a favicon and page logo.
+    :param page_title: Title that will appear on the top of the page.
     :param f: Function to explore.
     :param params_bounds: Sequence of (val_min, val_max) bounds for each parameter of the function f.
-    :param titles:
-    :param axes_labels:
-    :return: fig and axs (Axes object if there is one subplot, and list of Axes if there are multiple subplots).
+    :param titles: Sequence of titles for each plot.
+    :param axes_labels: Sequence of (x_label, y_label) for each plot.
+    :return: panel Template object
     """
     # Get init parameters
     params = signature(f).parameters
