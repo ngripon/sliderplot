@@ -132,8 +132,8 @@ sliderplot(f)
 
 ## Slider bounds settings
 
-Use the `param_bounds` arguments of the `sliderplot()` function to specify the slider bounds of each parameter. It takes
-a list of pairs of `(min_value, max_value)`. 
+Use the `param_bounds` argument of the `sliderplot()` function to specify the slider bounds of each parameter. It takes
+a list of pairs of `(min_value, max_value)`.
 
 The first pair contains the bounds of the first argument, the second pair
 contains the bounds of the second argument, etc...
@@ -141,6 +141,7 @@ contains the bounds of the second argument, etc...
 ### Example
 
 In the following example, the slider bounds are:
+
 - `amplitude = (0, 1)`
 - `frequency = (1, 1000)`
 - `phase = (0, np.pi)`
@@ -157,12 +158,49 @@ sliderplot(f, params_bounds=((0, 1), (1, 1000), (0, np.pi)))
 
 ## Axes labels
 
+To add axes labels to the subplots, set the `axes_labels` argument with a sequence of `(x_label, y_label)` pair of
+strings. The first
+pair will set the axis labels of the first subplot, the second pair the axis labels of the second subplot, etc...
 
+### Example
+
+``` python
+def f(amplitude, frequency, phase):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return ((x, y), (x, 2 * y)), ((x, 3 * y),)
+
+
+sliderplot(f, axes_labels=(("x1", "y1"), ("x2", "y2")))
+```
 
 ## Plot title
 
+To add plot titles to subplots, set the `titles` argument with a sequence of strings. The first
+string will be the title of the first subplot, the second string the title of the second subplot, etc...
+
+### Example
+
+``` python
+def f(amplitude, frequency, phase):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return ((x, y), (x, 2 * y)), ((x, 3 * y),)
+
+
+sliderplot(f, titles=("Subplot 1", "Subplot2"))
+```
+
 ## Web page title
 
-## Web page logo
+To set the title of the web page that show the sliderplot, use the `page_title` argument.
 
-TODO
+``` python
+def f(amplitude=1, frequency=np.pi, phase=np.pi / 2):
+    x = np.linspace(0, 10, 1000)
+    y = amplitude * np.sin(frequency * x + phase)
+    return x, y
+
+
+sliderplot(f, page_title="Page title")
+```
