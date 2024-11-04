@@ -8,6 +8,10 @@ It is very similar to [Holoviews DynamicMap](https://holoviews.org/reference/con
 multiple lines and
 plots capabilities, and with only sliders as interactive elements.
 
+```
+pip install sliderplot
+```
+
 # Demo
 
 <p align="center">
@@ -34,15 +38,16 @@ sliderplot(
 ```
 
 # Features
-  - [Single line](#single-line)
-  - [Multiple lines](#multiple-lines)
-  - [Multiple subplots](#multiple-subplots)
-  - [Line labels](#line-labels)
-  - [Initial slider position](#initial-slider-position)
-  - [Slider bounds settings](#slider-bounds-settings)
-  - [Axes labels](#axes-labels)
-  - [Plot title](#plot-title)
-  - [Web page title](#web-page-title)
+
+- [Single line](#single-line)
+- [Multiple lines](#multiple-lines)
+- [Multiple subplots](#multiple-subplots)
+- [Line labels](#line-labels)
+- [Initial slider position](#initial-slider-position)
+- [Slider bounds settings](#slider-bounds-settings)
+- [Axes labels](#axes-labels)
+- [Plot title](#plot-title)
+- [Web page title](#web-page-title)
 
 ## Single line
 
