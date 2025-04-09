@@ -5,7 +5,7 @@ with open("README.md", "r", encoding = "utf-8") as fh:
 
 setuptools.setup(
     name = "sliderplot",
-    version = "0.1.0",
+    version = "0.1.1",
     author = "Nathan Gripon",
     author_email = "n.gripon@gmail.com",
     description = "Turn a function into an interactive plot with a single line of code",
@@ -22,6 +22,6 @@ setuptools.setup(
     ],
     package_dir = {"": "src"},
     packages = setuptools.find_packages(where="src"),
-    python_requires = ">=3.10",
+    python_requires = ">=3.9",
     install_requires=['numpy','panel','bokeh', 'jupyter_bokeh']
 )
